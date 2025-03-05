@@ -1,6 +1,8 @@
 # Dibites
 
 A Dash-powered visualization tool for analyzing Bibites simulations.
+Only tested on versions:
+ -0.6.1a7
 
 ## Features
 
