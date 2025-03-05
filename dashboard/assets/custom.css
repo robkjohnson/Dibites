@@ -1,0 +1,34 @@
+/* assets/custom.css */
+
+/* Style for the dropdown menu container */
+.Select-menu-outer,
+.VirtualizedSelectMenu {
+    background-color: #343a40 !important;
+    color: white !important;
+}
+
+/* Style for the dropdown placeholder */
+.Select-placeholder,
+.VirtualizedSelectPlaceholder {
+    color: white !important;
+}
+
+/* Style for the dropdown options */
+.VirtualizedSelectOption {
+    background-color: #343a40 !important;
+    color: white !important;
+}
+
+/* Hover effect for options */
+.VirtualizedSelectOption:hover {
+    background-color: #212529 !important;
+}
+
+/* Ensure the selected simulation name is visible */
+.VirtualizedSelectSingleValue {
+    color: white !important;
+}
+
+.Select-value-label {
+    color: white !important;
+}

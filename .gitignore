@@ -1,0 +1,12 @@
+# Ignore virtual environments
+venv/
+__pycache__/
+*.pyc
+.DS_Store
+
+# Ignore data files
+/data/*
+/*.parquet
+
+# Ignore sensitive config files
+config.json
