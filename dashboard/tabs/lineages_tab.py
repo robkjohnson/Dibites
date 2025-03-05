@@ -210,6 +210,12 @@ def register_lineages_tab_callbacks(app):
                 "WombWAG": "#FF69B4",    # Hot Pink
             }
 
+            color_gene_colors = {
+                "ColorR": "Red",
+                "ColorG": "Green",
+                "ColorB": "Blue"
+                }
+
             # Gene Evolution Graphs
             def create_graph(title, genes, color_map=None):
                 if not gene_data:
@@ -234,7 +240,7 @@ def register_lineages_tab_callbacks(app):
 
             # Organized Gene Graphs
             grouped_gene_graphs = [
-                create_graph("Color Evolution", ["ColorR", "ColorG", "ColorB"]),
+                create_graph("Color Evolution", ["ColorR", "ColorG", "ColorB"], color_gene_colors),
                 create_graph("Incubation Time Evolution", ["LayTime", "HatchTime", "BroodTime"]),
                 create_graph("WAG Evolution", ["ArmorWAG", "FatWAG", "MouthMusclesWAG", "MoveMusclesWAG", "StomachWAG", "ThroatWAG", "WombWAG"], wag_colors),
                 create_graph("Fat Conversion Evolution", ["FatStorageDeadband", "FatStorageThreshold"]),
