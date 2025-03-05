@@ -11,8 +11,15 @@ from utils import load_species_data, get_simulations_base_folder
 
 def get_bibites_tab_content(sim_selected, n_intervals, simulations_base_folder):
     """
-    Returns the layout for the Bibites tab.
-    Uses the helper function `load_species_data` to reduce redundant code and improve efficiency.
+   Generates the content for the Bibites tab
+
+    Parameters:
+    - sim_selected (str): The currently selected simulation.
+    - n_intervals (int): A timer-based interval input (not directly used in layout).
+    - simulations_base_folder (str): The root directory containing simulation data.
+
+    Returns:
+    - html.Div: A Dash HTML layout containing dropdowns, graphs, and analysis sections.
     """
 
     # Load species data and dropdown options
@@ -85,14 +92,33 @@ def get_bibites_tab_content(sim_selected, n_intervals, simulations_base_folder):
 
 def create_neural_network_graph(nodes, synapses, tooltip_points=3):
     """
-    Generates a Plotly graph visualization of the neural network,
-    handling cases where synapses exist between the same two nodes in opposite directions.
-    Also ensures the graph remains a Directed Acyclic Graph (DAG) and restores tooltips for synapse weights.
-    
+    Generates a visual representation of a neural network using Plotly.
+
+    This function constructs a directed acyclic graph (DAG) representing the neural 
+    network of a selected bibite species. It:
+    - Categorizes nodes as input, hidden, or output neurons.
+    - Positions nodes in a layered layout to improve readability.
+    - Creates edges (synapses) with colors and thickness based on synapse weights.
+    - Includes interactive tooltips to display synapse weights.
+
+    The function also detects and removes cycles if any exist, ensuring the network
+    remains a valid DAG.
+
     Parameters:
-    - nodes: List of neuron nodes
-    - synapses: List of synapse connections
-    - tooltip_points: Number of evenly spaced invisible points along each synapse for displaying tooltips
+    - nodes (list of dict): A list of neuron nodes, each containing:
+        - "Index" (int): Unique identifier for the node.
+        - "Type" (int): Indicates if the node is input, hidden, or output.
+        - "Desc" (str): Description of the node.
+    - synapses (list of dict): A list of synaptic connections, each containing:
+        - "NodeIn" (int): Source node index.
+        - "NodeOut" (int): Target node index.
+        - "Weight" (float): Strength of the synapse.
+    - tooltip_points (int, optional): Number of evenly spaced invisible points along 
+      each synapse to enable hover tooltips. Default is 3.
+
+    Returns:
+    - go.Figure: A Plotly figure displaying the neural network graph with nodes and 
+      weighted edges.
     """
     def weight_to_scaled_color(weight):
         white = (255, 255, 255)
@@ -257,7 +283,26 @@ def create_neural_network_graph(nodes, synapses, tooltip_points=3):
 
 def create_gene_bar_chart(gene_data):
     """
-    Creates a horizontal bar chart for all gene values and a pie chart for WAG genes.
+    Generates a bar chart and a pie chart to visualize gene expression in a species.
+
+    This function creates:
+    - A horizontal bar chart displaying the values of all genes.
+    - A pie chart specifically for "WAG" genes, which represent key biological traits.
+
+    The function ensures:
+    - Gene values are converted to numeric format for accurate visualization.
+    - A predefined color mapping is applied to WAG genes for clarity.
+    - The layout is optimized for display in a dashboard.
+
+    Parameters:
+    - gene_data (dict): A dictionary where keys are gene names (str) and values are 
+      gene expression levels (float or convertible to float).
+
+    Returns:
+    - tuple (go.Figure, go.Figure): A tuple containing:
+        - The first figure (bar chart) showing all gene values.
+        - The second figure (pie chart) showing WAG gene distribution. If no WAG genes 
+          are present, an empty figure is returned.
     """
     if not gene_data:
         return go.Figure(), go.Figure()
@@ -331,8 +376,24 @@ def create_gene_bar_chart(gene_data):
 
 def get_gene_bar_chart(sim_selected, species_id, simulations_base_folder):
     """
-    Retrieves gene data and generates a bar chart for all genes and a pie chart for WAG genes.
-    Uses `load_species_data` for optimized file access.
+    Retrieves gene data for a selected species and generates corresponding visualizations.
+
+    This function:
+    - Loads gene expression data from the simulation files.
+    - Generates a bar chart for all gene values.
+    - Creates a pie chart specifically for WAG genes.
+    - Ensures robust error handling for missing or malformed data.
+
+    Parameters:
+    - sim_selected (str): The name of the selected simulation.
+    - species_id (int or str): The unique identifier of the selected species.
+    - simulations_base_folder (str): The base directory containing simulation data.
+
+    Returns:
+    - html.Div: A Dash layout containing:
+        - A bar chart visualizing gene values.
+        - A pie chart for WAG gene distribution (if applicable).
+        - If no data is found, an appropriate message is displayed instead.
     """
     if not sim_selected or not species_id:
         return html.Div("Please select a species.")
@@ -378,10 +439,20 @@ def get_gene_bar_chart(sim_selected, species_id, simulations_base_folder):
 
 def register_bibites_tab_callbacks(app):
     """
-    Registers callbacks for the Bibites tab, ensuring:
-    - The species dropdown is correctly populated and sorted by most alive first.
-    - The default species selection is the one with the most alive individuals.
-    - The Gene Bar Chart and Neural Network Graph update dynamically.
+    Registers all Dash callbacks for the Bibites tab to enable interactive updates.
+
+    This function ensures:
+    - The species dropdown dynamically updates based on the selected simulation.
+    - The output node dropdown populates with relevant neural network nodes.
+    - The gene bar chart and neural network graph update dynamically when the user 
+      selects a species or output node.
+    - The displayed graphs and charts are filtered and formatted based on user input.
+
+    Parameters:
+    - app (Dash instance): The Dash application where the callbacks are registered.
+
+    Returns:
+    - None: This function modifies the Dash app by adding interactive callbacks.
     """
     @app.callback(
         [Output("output-node-dropdown", "options"), Output("output-node-dropdown", "value")],  # Ensure both options & value are updated

@@ -9,9 +9,23 @@ from utils import seconds_to_hours, load_species_data, get_simulations_base_fold
 
 def get_lineages_tab_content(sim_selected, n_intervals, simulations_base_folder):
     """
-    Returns the layout for the Lineages tab, including lineage tracing, lineage population, 
-    and gene evolution graphs, with an option to ignore the root species.
-    Uses `load_species_data` for efficiency.
+    Generates the layout for the Lineages tab in the dashboard.
+
+    This function provides UI components to analyze the evolutionary lineage of species 
+    in a selected simulation. It includes:
+    - A dropdown for selecting a species.
+    - A checkbox to ignore the root species in the lineage trace.
+    - Sections for displaying lineage information, population trends, and gene evolution.
+    - Two-column layout for visualizing grouped and non-combined gene data.
+
+    Parameters:
+    - sim_selected (str): The currently selected simulation.
+    - n_intervals (int): A timer-based interval input (not directly used in layout).
+    - simulations_base_folder (str): The root directory containing simulation data.
+
+    Returns:
+    - html.Div: A Dash HTML layout containing the dropdown, lineage display, 
+      population trends, and gene evolution graphs.
     """
     species_df, species_options = load_species_data(sim_selected, simulations_base_folder)
 
@@ -62,6 +76,21 @@ def get_lineages_tab_content(sim_selected, n_intervals, simulations_base_folder)
 
 
 def register_lineages_tab_callbacks(app):
+    """
+    Registers all Dash callbacks for the Lineages tab, enabling dynamic updates.
+
+    This function ensures that:
+    - The lineage display updates based on the selected species.
+    - The lineage population graph is generated dynamically.
+    - Gene evolution graphs update when a species is selected.
+    - The root species can be optionally ignored in lineage tracing.
+
+    Parameters:
+    - app (Dash instance): The Dash application where the callbacks are registered.
+
+    Returns:
+    - None: This function modifies the Dash app by adding interactive callbacks.
+    """
     @ app.callback(
         [
             Output("lineages-display", "children"),
@@ -77,9 +106,25 @@ def register_lineages_tab_callbacks(app):
     )
     def update_lineage_and_graphs(selected_species, sim_selected, ignore_root_checkbox):
         """
-        Updates lineage tracking, population graphs, and gene evolution graphs.
-        Uses `load_species_data` for efficiency.
-        Loads `species_counts.parquet` manually for population tracking.
+        Dynamically updates the lineage information, population trends, and gene evolution graphs.
+
+        This function:
+        - Traces the evolutionary lineage of the selected species, considering parent-child relationships.
+        - Loads population data from the simulation and generates a lineage population graph.
+        - Extracts and visualizes gene evolution trends across the lineage.
+        - Allows the user to ignore the root species when analyzing the lineage.
+
+        Parameters:
+        - selected_species (int or str): The species ID selected by the user.
+        - sim_selected (str): The currently selected simulation.
+        - ignore_root_checkbox (list): A list containing "ignore" if the root species should be excluded.
+
+        Returns:
+        - tuple: A set of Dash components containing:
+            - html.Div: Displays the lineage text representation.
+            - dcc.Graph: A line chart showing the population trends of the lineage.
+            - html.Div: A column layout containing grouped gene evolution graphs.
+            - html.Div: A column layout containing individual gene evolution graphs.
         """
         if not sim_selected or not selected_species:
             return "Please select a species.", html.Div(), html.Div(), html.Div()
