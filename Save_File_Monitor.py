@@ -5,9 +5,9 @@ import json
 import re
 import pandas as pd
 from datetime import datetime
-from dashboard.utils import get_simulations_base_folder, get_update_frequency, load_dataframe, save_dataframe, load_processed_log, update_processed_log
+from dashboard.utils import get_simulations_base_folder, get_update_frequency, load_dataframe, save_dataframe, load_processed_log, update_processed_log, get_base_folder
 
-folder_path = get_simulations_base_folder()
+folder_path = get_base_folder()
 poll_interval = get_update_frequency()
 simulations_base_folder = os.path.join(folder_path, "Dibite_Simulation_Data")
 os.makedirs(folder_path, exist_ok=True)
@@ -35,7 +35,7 @@ def process_zip(zip_path):
                 sim_name = "default_sim"
 
             # Determine simulation folder and file paths
-            sim_folder = get_simulation_folder(sim_name)
+            sim_folder = os.path.join(simulations_base_folder, sim_name)
             species_data_file = os.path.join(sim_folder, "species_data.parquet")
             species_counts_file = os.path.join(sim_folder, "species_counts.parquet")
             
@@ -121,6 +121,8 @@ def main():
     
     while True:
         zip_files = [f for f in os.listdir(folder_path) if f.lower().endswith(".zip")]
+        
+        print(folder_path)
         new_files_found = False
         for filename in zip_files:
             if filename not in processed_zips:
@@ -128,7 +130,6 @@ def main():
                 sim_name = process_zip(zip_path)
                 processed_zips.add(filename)
                 new_files_found = True
-        
         if new_files_found:
             update_processed_log(processed_log_file, processed_zips)
         else:
