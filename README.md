@@ -56,7 +56,7 @@ Each simulation has its own subfolder within `Dibite_Simulation_Data`, named acc
 Once dependencies are installed and the configuration file is set up, start the application with:
 
 ```sh
-python app.py
+python Dibites.py
 ```
 
 ## Usage
