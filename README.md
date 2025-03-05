@@ -25,14 +25,28 @@ Before running the application, you need to create a `config.json` file in the p
 
 ```json
 {
-    "Path_To_Autosave_Folder": "C:\\Users\\<YOUR-USERNAME>\\AppData\\LocalLow\\The Bibites\\The Bibites\\Savefiles\\Autosaves",
+    "Path_To_Autosave_Folder": "",
     "UpdateFrequency": 600
 }
 ```
 
-- Replace `<YOUR-USERNAME>` with your Windows username.
 - The `Path_To_Autosave_Folder` should point to the directory where Bibites saves autosaves.
 - `UpdateFrequency` defines how often (in seconds) the application checks for new data.
+
+## Simulation Naming and Data Storage
+
+### How Simulations Are Named
+
+When a simulation is run, its name is extracted from the **settings.bb8settings** file inside the autosave ZIP archives. The name is taken from the name of the first zone. In order to create a new *sim* in Dibites, you will need to name the first zone of your sim something unique.
+
+### Where Data Is Saved
+
+Extracted simulation data is stored in the **Dibite_Simulation_Data** directory within the configured autosave folder. The relevant data files include:
+
+- `species_data.parquet` – Contains species details extracted from `speciesData.json`.
+- `species_counts.parquet` – Tracks population counts over time, derived from `.bb8` files inside the ZIP archives.
+
+Each simulation has its own subfolder within `Dibite_Simulation_Data`, named according to the simulation's extracted name.
 
 ## Running the Application
 
@@ -53,3 +67,5 @@ python app.py
 ## Contributing
 
 If you’d like to contribute, feel free to fork this repository and submit a pull request.
+
+I make no promises on speedy replies but I will try to keep up with this.
