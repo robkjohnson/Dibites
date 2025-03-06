@@ -35,8 +35,8 @@ Before running the application, you need to create a `config.json` file in the p
 }
 ```
 
-- The `Path_To_Autosave_Folder` should point to the directory where Bibites saves autosaves. The defaul path will be something like "C:\\Users\\YOUR NAME\\AppData\\LocalLow\\The Bibites\\The Bibites\\Savefiles\\Autosaves"
-    - Note: You will need the double \\\ in between folders in the path.
+- The `Path_To_Autosave_Folder` should point to the directory where Bibites saves autosaves. The default path will be something like "C:\\\Users\\\YOUR NAME\\\AppData\\\LocalLow\\\The Bibites\\\The Bibites\\\Savefiles\\\Autosaves"
+    - Note: You will need the double \\\ in between folders in the path. Replace the "YOUR NAME" with your user folder name.
 - `UpdateFrequency` defines how often (in seconds) the application checks for new data.
 
 ## Simulation Naming and Data Storage
