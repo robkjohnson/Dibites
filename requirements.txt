@@ -8,6 +8,7 @@ os
 json
 re
 time
+pyarrow
 datetime
 zipfile
 subprocess
