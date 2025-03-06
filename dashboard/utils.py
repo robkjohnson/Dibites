@@ -71,6 +71,9 @@ def load_dataframe(file_path, columns=None):
 def save_dataframe(df, file_path):
     """Save a Pandas DataFrame to a Parquet file."""
     try:
+        # Ensure the directory exists
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
         df.to_parquet(file_path, index=False)
     except Exception as e:
         print(f"Error saving data to {file_path}: {e}")
