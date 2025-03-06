@@ -1,9 +1,11 @@
 # Dibites
 
 A Dash-powered visualization tool for analyzing Bibites simulations.
+This is a work in progess with more features coming.
 
 Only tested on versions:
  - 0.6.1a7
+ - Steam 0.6.1
 
 ## Features
 
@@ -13,7 +15,7 @@ Only tested on versions:
 
 ## Installation
 
-To install the necessary dependencies, ensure you have **Python 3.8+** installed, then run:
+To install the necessary dependencies, ensure you have **Python 3.8+** installed, navigate to the folder where Dibits is saved within a command prompt, then run:
 
 ```sh
 pip install -r requirements.txt
@@ -33,7 +35,8 @@ Before running the application, you need to create a `config.json` file in the p
 }
 ```
 
-- The `Path_To_Autosave_Folder` should point to the directory where Bibites saves autosaves.
+- The `Path_To_Autosave_Folder` should point to the directory where Bibites saves autosaves. The defaul path will be something like "C:\\Users\\<YOUR NAME>\\AppData\\LocalLow\\The Bibites\\The Bibites\\Savefiles\\Autosaves"
+    - Note: You will need the double \\ in between folders in the path.
 - `UpdateFrequency` defines how often (in seconds) the application checks for new data.
 
 ## Simulation Naming and Data Storage
