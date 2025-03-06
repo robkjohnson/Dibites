@@ -72,9 +72,10 @@ Once you've run Dibites.py you'll be able go to https:\\\localhost:8050 or https
 
 1. **Select a simulation** – Choose a dataset to analyze.
 2. **Explore the tabs**:
-   - **Bibites Tab**: Analyze neural networks and genetic attributes.
    - **Simulation Tab**: Observe population trends over time.
-   - **Lineages Tab**: Trace the evolutionary lineage of species.
+   - **Bibites Analysis**: Gives more insight into species of Bibites.
+       - **Bibites Tab**: Analyze genetic attributes and neural network of a species.
+       - **Lineages Tab**: Trace the evolutionary lineage of species and see how genes have changed over time.
 
 ## Contributing
 
