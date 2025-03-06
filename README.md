@@ -23,27 +23,29 @@ pip install -r requirements.txt
 
 ## Configuration
 
-Before running the application, you need to create a `config.json` file in the project directory. This file should specify the location where Bibites saves its autosaves.
+Before running the application, you need to update the `config.json` file in the project directory. This file should specify the location where Bibites saves its autosaves.
 
-1. Create a file named `config.json` in the root of the project.
-2. Add the following structure:
+1. Open the config.json file.
+2. Update the Path_To_Autosave_Folder value to be the path to your autosave folder. Below is the default folder location, you just need to replace **robkj** with your user name.
 
 ```json
 {
-    "Path_To_Autosave_Folder": "",
+    "Path_To_Autosave_Folder": ""C:\\\Users\\\robkj\\\AppData\\\LocalLow\\\The Bibites\\\The Bibites\\\Savefiles\\\Autosaves"",
     "UpdateFrequency": 600
 }
 ```
 
-- The `Path_To_Autosave_Folder` should point to the directory where Bibites saves autosaves. The default path will be something like "C:\\\Users\\\YOUR NAME\\\AppData\\\LocalLow\\\The Bibites\\\The Bibites\\\Savefiles\\\Autosaves"
-    - Note: You will need the double \\\ in between folders in the path. Replace the "YOUR NAME" with your user folder name.
+- The `Path_To_Autosave_Folder` should point to the directory where Bibites saves autosaves.
+    - Note: You will need the double \\\ in between folders in the path. Replace the "robkj" with your user folder name.
 - `UpdateFrequency` defines how often (in seconds) the application checks for new data.
 
 ## Simulation Naming and Data Storage
 
 ### How Simulations Are Named
 
-When a simulation is run, its name is extracted from the **settings.bb8settings** file inside the autosave ZIP archives. The name is taken from the name of the first zone. In order to create a new *sim* in Dibites, you will need to name the first zone of your sim something unique.
+When a simulation is run, its name is extracted from the **settings.bb8settings** file inside the autosave ZIP archives. 
+
+The name is taken from the name of the first zone. In order to create a new *sim* in Dibites, you will need to name the first zone of your sim something unique.
 
 ### Where Data Is Saved
 
@@ -61,6 +63,10 @@ Once dependencies are installed and the configuration file is set up, start the 
 ```sh
 python Dibites.py
 ```
+
+## Viewing the Dash
+
+Once you've run Dibites.py you'll be able go to https:\\\localhost:8050 or https:\\\127.0.0.1:8050 to view the dashboard.
 
 ## Usage
 

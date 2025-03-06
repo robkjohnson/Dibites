@@ -7,6 +7,3 @@ __pycache__/
 # Ignore data files
 /data/*
 /*.parquet
-
-# Ignore sensitive config files
-config.json

@@ -241,7 +241,7 @@ def create_neural_network_graph(nodes, synapses, tooltip_points=3):
             x0, y0 = positions[node_in]
             x1, y1 = positions[node_out]
             edge_color = weight_to_scaled_color(weight)
-            line_width = .25 + 3.75 * abs(weight)
+            line_width = min(.25 + 3.75 * abs(weight), 5)
             edge_traces.append(
                 go.Scatter(
                     x=[x0, x1],
