@@ -1,4 +1,4 @@
-﻿from dash import dcc, html, Output, Input
+﻿from dash import dcc, html, Output, Input, State
 import pandas as pd
 import os
 import json
@@ -119,7 +119,7 @@ def create_neural_network_graph(nodes, synapses, tooltip_points=3):
     Returns:
     - go.Figure: A Plotly figure displaying the neural network graph with nodes and 
       weighted edges.
-    """
+    """    
     def weight_to_scaled_color(weight):
         white = (255, 255, 255)
         green = (0, 255, 0)
@@ -140,91 +140,60 @@ def create_neural_network_graph(nodes, synapses, tooltip_points=3):
         else:
             color = white
         return f"rgb({color[0]},{color[1]},{color[2]})"
-
-    positions = {}
+    
+    # Create directed graph and add nodes
+    G = nx.DiGraph()
     input_nodes, hidden_nodes, output_nodes = [], [], []
-    active_input_nodes = set()
+    connected_inputs = set()
+    
+    # Add synapses (edges) and track connected input nodes
     for synapse in synapses:
-        active_input_nodes.add(synapse["NodeIn"])
+        G.add_edge(synapse["NodeIn"], synapse["NodeOut"], weight=synapse["Weight"])
+        connected_inputs.add(synapse["NodeIn"])
+    
     for node in nodes:
-        node_id = node["Index"]
-        node_type = node["Type"]
-        node_desc = node["Desc"]
-        if node_type == 0:
-            if node_id in active_input_nodes:
-                input_nodes.append(node_id)
-        elif "Hidden" in node_desc:
-            hidden_nodes.append(node_id)
+        if node["Type"] == 0 and node["Index"] not in connected_inputs:
+            continue  # Skip unconnected input nodes
+        
+        G.add_node(node["Index"], desc=node["Desc"], activation=node.get("baseActivation", "N/A"))
+        if node["Type"] == 0:
+            input_nodes.append(node["Index"])
+        elif "Hidden" in node["Desc"]:
+            hidden_nodes.append(node["Index"])
         else:
-            output_nodes.append(node_id)
-
-    graph = nx.DiGraph()
-    for synapse in synapses:
-        graph.add_edge(synapse["NodeIn"], synapse["NodeOut"], weight=synapse["Weight"])
+            output_nodes.append(node["Index"])
     
-    # Detect and break cycles if they exist by removing the edge with the lowest weight
-    try:
-        cycle = nx.find_cycle(graph, orientation='original')
-        min_weight_edge = min(cycle, key=lambda edge: graph[edge[0]][edge[1]]['weight'])
-        graph.remove_edge(min_weight_edge[0], min_weight_edge[1])
-    except nx.NetworkXNoCycle:
-        pass  # No cycles found
-
-    layer_mapping = {}
-    for node_id in input_nodes:
-        layer_mapping[node_id] = 0
-    for node_id in nx.topological_sort(graph):
-        if node_id in layer_mapping:
-            continue
-        preds = list(graph.predecessors(node_id))
-        if preds:
-            max_parent_layer = max(layer_mapping.get(p, 0) for p in preds)
-            current_layer = max_parent_layer + 1
-        else:
-            current_layer = 0
-        layer_mapping[node_id] = current_layer
-
+    # Assign x-coordinates based on type and space hidden nodes
+    positions = {}
+    vertical_spacing = 2  # Increase this value to space out nodes more
+    hidden_x_min, hidden_x_max = -1, 1  # Ensure hidden nodes stay between input and output
+    
+    def evenly_space(nodes, x_coord):
+        count = len(nodes)
+        return {node: (x_coord, vertical_spacing * (i - count / 2)) for i, node in enumerate(sorted(nodes))}
+    
+    positions.update(evenly_space(input_nodes, -2))
+    positions.update(evenly_space(output_nodes, 2))
+    
+    # Apply force-directed layout for hidden nodes while keeping them within bounds
     if hidden_nodes:
-        max_hidden_layer = max(layer_mapping[n] for n in hidden_nodes)
-    else:
-        max_hidden_layer = 0
-    for node_id in output_nodes:
-        layer_mapping[node_id] = max_hidden_layer + 1
-
-    unique_layers = sorted(set(layer_mapping.values()))
-    layer_to_x = {layer: layer for layer in unique_layers}
-    for node_id in layer_mapping:
-        positions[node_id] = (layer_to_x[layer_mapping[node_id]], 0)
-
-    layer_nodes = {}
-    for node_id, (x, _) in positions.items():
-        layer_nodes.setdefault(x, []).append(node_id)
-    for x, node_ids in layer_nodes.items():
-        count = len(node_ids)
-        start_y = -((count - 1))
-        for i, node_id in enumerate(sorted(node_ids)):
-            positions[node_id] = (x, start_y + i * 2)
-
-    node_x, node_y, node_labels, node_hovertexts, node_colors = [], [], [], [], []
-    node_desc_map = {node["Index"]: node["Desc"] for node in nodes}
-    node_activation_map = {node["Index"]: node.get("baseActivation", "N/A") for node in nodes}
+        pos_spring = nx.spring_layout(G, seed=42, k=0.3)  # Force-directed placement
+        for node in hidden_nodes:
+            x, y = pos_spring[node]
+            x = max(hidden_x_min, min(hidden_x_max, x))  # Ensure x stays between input and output
+            y *= vertical_spacing * 5  # Scale y spacing for better clarity
+            positions[node] = (x, y)
     
+    node_x, node_y, node_labels, node_hovertexts, node_colors = [], [], [], [], []
     for node_id, (x, y) in positions.items():
         node_x.append(x)
         node_y.append(y)
-        node_labels.append(node_desc_map.get(node_id, ""))
-        node_hovertexts.append(f"Activation: {node_activation_map.get(node_id)}")
-        
-        if node_id in input_nodes:
-            node_colors.append("cyan")
-        elif node_id in hidden_nodes:
-            node_colors.append("orange")
-        else:
-            node_colors.append("blue")
-
+        node_labels.append(G.nodes[node_id]["desc"])
+        node_hovertexts.append(f"Activation: {G.nodes[node_id]['activation']}")
+        node_colors.append("cyan" if node_id in input_nodes else "orange" if node_id in hidden_nodes else "blue")
+    
     node_trace = go.Scatter(
-        x=node_x, 
-        y=node_y,
+        x=node_x, y=node_y,
         mode="markers+text",
         marker=dict(size=15, color=node_colors),
         text=node_labels,
@@ -232,30 +201,32 @@ def create_neural_network_graph(nodes, synapses, tooltip_points=3):
         textposition="top center",
         hoverinfo="text"
     )
-
+    
     edge_traces = []
     tooltip_x, tooltip_y, tooltip_text = [], [], []
-    for synapse in synapses:
-        node_in, node_out, weight = synapse["NodeIn"], synapse["NodeOut"], synapse["Weight"]
-        if graph.has_edge(node_in, node_out):
-            x0, y0 = positions[node_in]
-            x1, y1 = positions[node_out]
-            edge_color = weight_to_scaled_color(weight)
-            line_width = min(.25 + 3.75 * abs(weight), 5)
-            edge_traces.append(
-                go.Scatter(
-                    x=[x0, x1],
-                    y=[y0, y1],
-                    mode="lines",
-                    line=dict(width=line_width, color=edge_color),
-                    hoverinfo="none"
-                )
+    arrow_size = 0.02  # Adjust arrowhead size
+    for edge in G.edges:
+        x0, y0 = positions[edge[0]]
+        x1, y1 = positions[edge[1]]
+        weight = G[edge[0]][edge[1]]["weight"]
+        edge_color = weight_to_scaled_color(weight)
+        
+        edge_traces.append(
+            go.Scatter(
+                x=[x0, (x0 + x1) / 2, x1],
+                y=[y0, (y0 + y1) / 2, y1],
+                mode="lines+markers",
+                line=dict(width=0.5 + 3.5 * abs(weight), color=edge_color),
+                marker=dict(size=2+6*abs(weight), symbol="arrow-bar-up", angleref="previous", color=edge_color),
+                hoverinfo="none"
             )
-            for i in range(1, tooltip_points + 1):
-                tooltip_x.append(x0 + (x1 - x0) * (i / (tooltip_points + 1)))
-                tooltip_y.append(y0 + (y1 - y0) * (i / (tooltip_points + 1)))
-                tooltip_text.append(f"{node_desc_map.get(node_in, 'Unknown')} → {node_desc_map.get(node_out, 'Unknown')}<br>Weight: {weight:.2f}")
-
+        )
+        
+        for i in range(1, tooltip_points + 1):
+            tooltip_x.append(x0 + (x1 - x0) * (i / (tooltip_points + 1)))
+            tooltip_y.append(y0 + (y1 - y0) * (i / (tooltip_points + 1)))
+            tooltip_text.append(f"{G.nodes[edge[0]]['desc']} → {G.nodes[edge[1]]['desc']}<br>Weight: {weight:.2f}")
+    
     tooltip_trace = go.Scatter(
         x=tooltip_x, y=tooltip_y,
         mode="markers",
@@ -270,14 +241,16 @@ def create_neural_network_graph(nodes, synapses, tooltip_points=3):
             title="Neural Network Visualization",
             template="plotly_dark",
             showlegend=False,
-            height=max(500, len(input_nodes) * 60),
-            xaxis_visible=False,  # Hides the x-axis
-            yaxis_visible=False,  # Hides the y-axis
-            xaxis=dict(title="Layers"),
-            yaxis=dict(title="Neuron Position")
+            height=max(600, len(input_nodes) * 50 + 100),  # Adjust height based on input nodes
+            xaxis_visible=False,
+            yaxis_visible=False
         )
     )
     return fig
+
+
+
+
 
 
 
