@@ -216,8 +216,8 @@ def create_neural_network_graph(nodes, synapses, tooltip_points=3):
                 x=[x0, (x0 + x1) / 2, x1],
                 y=[y0, (y0 + y1) / 2, y1],
                 mode="lines+markers",
-                line=dict(width=0.5 + 3.5 * abs(weight), color=edge_color),
-                marker=dict(size=2+6*abs(weight), symbol="arrow-bar-up", angleref="previous", color=edge_color),
+                line=dict(width=min(0.5 + 3.5 * abs(weight), 5), color=edge_color),
+                marker=dict(size=min(2+6*abs(weight),15), symbol="arrow-bar-up", angleref= "previous", color=edge_color),
                 hoverinfo="none"
             )
         )

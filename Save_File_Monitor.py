@@ -122,7 +122,7 @@ def main():
     while True:
         zip_files = [f for f in os.listdir(folder_path) if f.lower().endswith(".zip")]
         
-        print(folder_path)
+        # print(folder_path)
         new_files_found = False
         for filename in zip_files:
             if filename not in processed_zips:

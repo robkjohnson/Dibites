@@ -3,7 +3,7 @@
 A Dash-powered visualization tool for analyzing Bibites simulations.
 This is a work in progess with more features coming.
 
-Only tested on versions:
+Only tested for Windows versions:
  - 0.6.1a7
  - Steam 0.6.1
 

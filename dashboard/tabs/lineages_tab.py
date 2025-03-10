@@ -158,7 +158,7 @@ def register_lineages_tab_callbacks(app):
                 lineage_species_ids = lineage_species_ids[:-1]  
 
             # Display lineage
-            lineage_text = " → ".join(map(str, lineage_species_ids))
+            lineage_text = " → ".join(map(lambda x: str(int(x)), reversed(lineage_species_ids)))
             lineage_display = html.Div([html.P(f"Lineage: {lineage_text}")])
 
             # Lineage Population Graph
