@@ -5,6 +5,7 @@ import json
 import colorsys
 import numpy as np
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 import networkx as nx
 from utils import load_species_data, get_simulations_base_folder
 
@@ -323,19 +324,21 @@ def create_gene_bar_chart(gene_data):
         }
 
     fat_colors = {
-        "FatStorageDeadband":"",
-        "FatStorageThreshold":""
+        "FatStorageDeadband":"#ff7f0e",
+        "FatStorageThreshold":"#e377c2"
         }
 
     mutation_count_colors = {
-        "AverageMutationNumber":"",
-        "BrainAverageMutation":""
+        "AverageMutationNumber":"#1f77b4",
+        "BrainAverageMutation":"#ff7f0e"
         }
 
     mutation_sigma_colors = {
-        "MutationAmountSigma":"",
-        "BrainMutationsSigma":""
+        "MutationAmountSigma":"Blue",
+        "BrainMutationSigma":"Red"
         }
+
+
 
     # Filter WAG genes
     wag_genes = {gene: value for gene, value in gene_data.items() if gene in wag_colors}
@@ -343,7 +346,10 @@ def create_gene_bar_chart(gene_data):
     sense_genes = {gene: value for gene, value in gene_data.items() if gene in sense_colors}
     reproduction_genes = {gene: value for gene, value in gene_data.items() if gene in reproduction_colors}
     herding_genes = {gene: value for gene, value in gene_data.items() if gene in herding_colors}
-    bar_genes = {gene: value for gene, value in gene_data.items() if (gene not in wag_colors and gene not in color_colors and gene not in sense_colors and gene not in reproduction_colors and gene not in herding_colors)}
+    fat_genes = {gene: value for gene, value in gene_data.items() if gene in fat_colors}
+    mutation_count_genes = {gene: value for gene, value in gene_data.items() if gene in mutation_count_colors}
+    mutation_sigma_genes = {gene: value for gene, value in gene_data.items() if gene in mutation_sigma_colors}
+    bar_genes = {gene: value for gene, value in gene_data.items() if (gene not in wag_colors and gene not in color_colors and gene not in sense_colors and gene not in reproduction_colors and gene not in herding_colors and gene != "HerdSeparationDistance" and gene not in fat_colors and gene != "Diet" and gene not in mutation_count_colors  and gene not in mutation_sigma_colors)}
 
     # Create the bar chart
     bar_chart = go.Figure()
@@ -415,6 +421,7 @@ def create_gene_bar_chart(gene_data):
             title="Color Distribution",
             template="plotly_dark",
             margin=dict(l=20, r=20, t=40, b=40),
+            plot_bgcolor=f'rgb({255/color_genes["ColorR"]}, {255/color_genes["ColorG"]}, {255/color_genes["ColorB"]})',
         )
     else:
         color_pie = go.Figure()
@@ -456,7 +463,92 @@ def create_gene_bar_chart(gene_data):
         margin=dict(l=100, r=20, t=40, b=40),
     )
 
-    return bar_chart, wag_pie, color_pie, sense_bar, reproduction_bar, herding_bar
+    if fat_colors:
+        fat_bar = go.Figure()
+        fat_bar.add_trace(
+            go.Bar(
+                name = "Fat to Energy",
+                x=['Energy'],
+                y=[fat_genes["FatStorageDeadband"]],
+                marker = dict(color = fat_colors["FatStorageDeadband"]),
+                hovertemplate=f"Energy: {fat_genes['FatStorageDeadband']}"
+            )
+        )
+        fat_bar.add_trace(
+            go.Bar(
+                name = "No conversion",
+                x=['Energy'],
+                y=[ fat_genes["FatStorageThreshold"] - fat_genes["FatStorageDeadband"]],
+                marker = dict(color = "#7f7f7f"),
+                hovertemplate=f"Energy: {fat_genes['FatStorageDeadband']} - {fat_genes['FatStorageThreshold']}"
+            )
+        )
+        fat_bar.add_trace(
+            go.Bar(
+                name = "Energy to Fat",
+                x=['Energy'],
+                y=[1 - fat_genes["FatStorageThreshold"]],
+                marker = dict(color = "#bcbd22"),
+                hovertemplate=f"Energy: {fat_genes['FatStorageThreshold']}"
+            )
+        )
+        fat_bar.update_layout(
+            title="Fat Conversion Genes",
+            xaxis_title="",
+            yaxis_title="Energy Level",
+            barmode= 'stack',
+            template="plotly_dark",
+            margin=dict(l=100, r=20, t=40, b=40),
+        )
+
+    if mutation_count_colors:
+        mutation_bar = go.Figure()
+        mutation_bar = make_subplots(specs=[[{"secondary_y": True}]])
+        mutation_bar.add_trace(
+            go.Bar(
+                name = "Number",
+                x=['Brain Mutation'],
+                y=[mutation_count_genes["BrainAverageMutation"]],
+                marker = dict(color = mutation_count_colors["BrainAverageMutation"]),
+            ),
+            secondary_y=False
+        )
+        mutation_bar.add_trace(
+            go.Bar(
+                name = "Number",
+                x=['Average Mutation'],
+                y=[mutation_count_genes["AverageMutationNumber"]],
+                marker = dict(color = mutation_count_colors["AverageMutationNumber"]),
+            ),
+            secondary_y=False
+        )
+        mutation_bar.add_trace(
+            go.Scatter(
+                name = "Sigma",
+                x=['Brain Mutation'],
+                y=[mutation_sigma_genes["BrainMutationSigma"]],
+                marker = dict(color = mutation_sigma_colors["BrainMutationSigma"]),
+            ),
+            secondary_y=True
+        )
+        mutation_bar.add_trace(
+            go.Scatter(
+                name = "Sigma",
+                x=['Average Mutation'],
+                y=[mutation_sigma_genes["MutationAmountSigma"]],
+                marker = dict(color = mutation_sigma_colors["MutationAmountSigma"]),
+            ),
+            secondary_y=True
+        )
+        mutation_bar.update_layout(
+            title="Mutation Genes",
+            xaxis_title="",
+            template="plotly_dark",
+            margin=dict(l=100, r=20, t=50, b=20),
+        )
+        mutation_bar.update_yaxes(title_text = "Mutation Count", secondary_y = False)
+        mutation_bar.update_yaxes(title_text = "Mutation Simga", secondary_y = True)
+    return bar_chart, wag_pie, color_pie, sense_bar, reproduction_bar, herding_bar, fat_bar, mutation_bar
 
 
 def get_gene_bar_chart(sim_selected, species_id, simulations_base_folder):
@@ -504,7 +596,15 @@ def get_gene_bar_chart(sim_selected, species_id, simulations_base_folder):
             return html.Div("No genes found for this species.")
 
         # Generate bar and pie charts
-        bar_chart, wag_pie, color_pie, sense_bar, reproduction_bar, herding_bar = create_gene_bar_chart(gene_data)
+        bar_chart, wag_pie, color_pie, sense_bar, reproduction_bar, herding_bar, fat_bar, mutation_bar = create_gene_bar_chart(gene_data)
+
+        diet_cat =""
+        if gene_data['Diet'] <= .14:
+            diet_cat = "Herbivore"
+        elif gene_data['Diet'] >= .46:
+            diet_cat = "Carnivore"
+        else:
+            diet_cat = "Omnivore"
 
         # Return a layout with both graphs side by side
         return html.Div(
@@ -522,15 +622,26 @@ def get_gene_bar_chart(sim_selected, species_id, simulations_base_folder):
                         html.Div(
                             style={"display": "flex", "gap": "20px"},
                             children = [
-                                dcc.Graph(
-                                    figure=bar_chart,
-                                    config={"displayModeBar": True},
-                                        style={"flex": "2", "height": 400}
+                                html.Div(
+                                    style={
+                                        "flex": "2", 
+                                        "display": "flex", 
+                                        "flexDirection": "column", 
+                                        "gap": "5px"
+                                    },
+                                    children = [
+                                        html.H6(f"HerdSeparationDistance: {gene_data['HerdSeparationDistance']}"),
+                                        dcc.Graph(
+                                            figure=herding_bar,
+                                            config={"displayModeBar": False},
+                                                style={"flex": "1", "height": 400}
+                                        ),
+                                    ]
                                 ),
                                 dcc.Graph(
-                                    figure=herding_bar,
+                                    figure=bar_chart,
                                     config={"displayModeBar": False},
-                                        style={"flex": "1", "height": 400}
+                                        style={"flex": "2", "height": 400}
                                 ),
                             ]
                         ),
@@ -560,15 +671,63 @@ def get_gene_bar_chart(sim_selected, species_id, simulations_base_folder):
                         "gap": "20px"
                     },
                     children=[
-                        dcc.Graph(
-                            figure=wag_pie,
-                            config={"displayModeBar": False},
-                            style={"height": 400}
+                        html.Div(
+                            style={"display": "flex", "gap": "20px"},
+                            children=[
+                                dcc.Graph(
+                                    figure=wag_pie,
+                                    config={"displayModeBar": False},
+                                    style={"flex": "2", "height": 400}
+                                ),
+                                html.Div(
+                                    style={
+                                        "flex": "1", 
+                                        "display": "flex", 
+                                        "flexDirection": "column", 
+                                        "gap": "5px"
+                                    },
+                                    children=[
+                                        html.H6(f"Diet: {gene_data['Diet']} ({diet_cat})"),
+                                        dcc.Graph(
+                                            figure=fat_bar,
+                                            config={"displayModeBar": False},
+                                            style={"flex": "4"}
+                                        ),
+                                    ]
+                                ),
+                            ]
                         ),
-                        dcc.Graph(
-                            figure=color_pie,
-                            config={"displayModeBar": False},
-                            style={"height": 400}
+                         html.Div(
+                            style={"display": "flex", "gap": "20px"},
+                            children=[ 
+                                html.Div(
+                                    style={
+                                        "flex": "2", 
+                                        "display": "flex", 
+                                        "flexDirection": "column", 
+                                        "gap": "5px"
+                                    },
+                                    children = [
+                                        dcc.Graph(
+                                            figure=color_pie,
+                                            config={"displayModeBar": False},
+                                            style={"flex": "5", "height": 400}
+                                        ),
+                                        html.Div(
+                                            style={
+                                                'backgroundColor': f'rgb({255*gene_data["ColorR"]}, {255*gene_data["ColorG"]}, {255*gene_data["ColorB"]})',
+                                                'display': 'inline-block',
+                                                "flex": ".5"
+                                            }
+                                        ),
+                                    ]
+                                ),
+                                dcc.Graph(
+                                    figure=mutation_bar,
+                                    config={"displayModeBar": False},
+                                    style={"flex": "2", "height": 400}
+                                ),
+                            ]
                         )
                     ]
                 )
