@@ -89,7 +89,6 @@ def get_bibites_tab_content(sim_selected, n_intervals, simulations_base_folder):
     )
 
 
-
 def create_neural_network_graph(nodes, synapses, tooltip_points=3):
     """
     Generates a visual representation of a neural network using Plotly.
@@ -148,8 +147,9 @@ def create_neural_network_graph(nodes, synapses, tooltip_points=3):
     
     # Add synapses (edges) and track connected input nodes
     for synapse in synapses:
-        G.add_edge(synapse["NodeIn"], synapse["NodeOut"], weight=synapse["Weight"])
-        connected_inputs.add(synapse["NodeIn"])
+        if synapse["En"] == True:
+            G.add_edge(synapse["NodeIn"], synapse["NodeOut"], weight=synapse["Weight"])
+            connected_inputs.add(synapse["NodeIn"])
     
     for node in nodes:
         if node["Type"] == 0 and node["Index"] not in connected_inputs:
@@ -249,11 +249,6 @@ def create_neural_network_graph(nodes, synapses, tooltip_points=3):
     return fig
 
 
-
-
-
-
-
 def create_gene_bar_chart(gene_data):
     """
     Generates a bar chart and a pie chart to visualize gene expression in a species.
@@ -291,25 +286,6 @@ def create_gene_bar_chart(gene_data):
         print(f"Error converting gene values to float: {e}")
         return go.Figure(), go.Figure()
 
-    # Create the bar chart
-    bar_chart = go.Figure()
-    bar_chart.add_trace(
-        go.Bar(
-            x=gene_values,
-            y=gene_names,
-            orientation="h",
-            marker=dict(color="blue"),
-        )
-    )
-    bar_chart.update_layout(
-        title="Gene Values for Selected Species",
-        xaxis_title="Gene Value",
-        yaxis_title="Gene Name",
-        template="plotly_dark",
-        margin=dict(l=100, r=20, t=40, b=40),
-        height=500,  # Ensure enough space
-    )
-
     # Define custom color mapping for WAG genes
     wag_colors = {
         "ArmorWAG": "#555555",   # Dark Grey
@@ -321,22 +297,102 @@ def create_gene_bar_chart(gene_data):
         "WombWAG": "#FF69B4",    # Hot Pink
     }
 
+    color_colors = {
+        "ColorR": "Red",
+        "ColorG": "Green",
+        "ColorB": "Blue"
+        }
+
+    sense_colors = {
+        "ViewRadius": "#1f77b4",
+        "ViewAngle": "#ff7f0e",
+        "PheroSense": "#2ca02c"
+    }
+
+    reproduction_colors = {
+        "LayTime": "#d62728",
+        "BroodTime": "#9467bd",
+        "HatchTime": "#8c564b"
+    }
+
+    herding_colors = {
+        "HerdSeparationWeight": "#e377c2",
+        "HerdVelocityWeight": "#17becf",
+        "HerdAlignmentWeight": "#7f7f7f",
+        "HerdCohesionWeight": "#bcbd22"
+        }
+
+    fat_colors = {
+        "FatStorageDeadband":"",
+        "FatStorageThreshold":""
+        }
+
+    mutation_count_colors = {
+        "AverageMutationNumber":"",
+        "BrainAverageMutation":""
+        }
+
+    mutation_sigma_colors = {
+        "MutationAmountSigma":"",
+        "BrainMutationsSigma":""
+        }
+
     # Filter WAG genes
     wag_genes = {gene: value for gene, value in gene_data.items() if gene in wag_colors}
+    color_genes = {gene: value for gene, value in gene_data.items() if gene in color_colors}
+    sense_genes = {gene: value for gene, value in gene_data.items() if gene in sense_colors}
+    reproduction_genes = {gene: value for gene, value in gene_data.items() if gene in reproduction_colors}
+    herding_genes = {gene: value for gene, value in gene_data.items() if gene in herding_colors}
+    bar_genes = {gene: value for gene, value in gene_data.items() if (gene not in wag_colors and gene not in color_colors and gene not in sense_colors and gene not in reproduction_colors and gene not in herding_colors)}
+
+    # Create the bar chart
+    bar_chart = go.Figure()
+    bar_chart.add_trace(
+        go.Bar(
+            x=list(bar_genes.values()),
+            y=list(bar_genes.keys()),
+            orientation="h",
+            marker=dict(color="blue"),
+        )
+    )
+    bar_chart.update_layout(
+        title="Gene Values for Selected Species",
+        xaxis_title="Gene Value",
+        yaxis_title="Gene Name",
+        template="plotly_dark",
+        margin=dict(l=100, r=20, t=40, b=40),
+    )
+
+    sense_bar = go.Figure()
+    sense_bar.add_trace(
+        go.Bar(
+            y=list(sense_genes.values()),
+            x=list(sense_genes.keys()),
+            orientation="v",
+            marker=dict(color=[sense_colors[gene] for gene in sense_colors.keys()]),
+        )
+    )
+    sense_bar.update_layout(
+        title="Sense Genes",
+        xaxis_title="Gene Value",
+        yaxis_title="Gene Name",
+        template="plotly_dark",
+        margin=dict(l=100, r=20, t=40, b=40),
+    )
 
     if wag_genes:
         # Create the pie chart
-        pie_chart = go.Figure()
-        pie_chart.add_trace(
+        wag_pie = go.Figure()
+        wag_pie.add_trace(
             go.Pie(
                 labels=list(wag_genes.keys()),
                 values=list(wag_genes.values()),
                 textinfo="label+percent",
-                hole=0.3,  # Semi-donut style
+                hole=0.3,
                 marker=dict(colors=[wag_colors[gene] for gene in wag_genes.keys()]),
             )
         )
-        pie_chart.update_layout(
+        wag_pie.update_layout(
             title="WAG Gene Distribution",
             template="plotly_dark",
             margin=dict(l=20, r=20, t=40, b=40),
@@ -344,7 +400,63 @@ def create_gene_bar_chart(gene_data):
     else:
         pie_chart = go.Figure()
 
-    return bar_chart, pie_chart
+    if color_genes:
+        color_pie = go.Figure()
+        color_pie.add_trace(
+            go.Pie(
+                labels=list(color_genes.keys()),
+                values=list(color_genes.values()),
+                textinfo="label+percent",
+                hole=0.3,
+                marker=dict(colors=[color_colors[gene] for gene in color_genes.keys()]),
+            )
+        )
+        color_pie.update_layout(
+            title="Color Distribution",
+            template="plotly_dark",
+            margin=dict(l=20, r=20, t=40, b=40),
+        )
+    else:
+        color_pie = go.Figure()
+
+    if reproduction_colors:
+        reproduction_bar = go.Figure()
+        for cat, value in reproduction_genes.items():
+            reproduction_bar.add_trace(
+                go.Bar(
+                    name = cat,
+                    x=['Stage'],
+                    y=[value],
+                    marker = dict(color = reproduction_colors[cat])
+                )
+            )
+    reproduction_bar.update_layout(
+        title="Reproduction Genes",
+        xaxis_title="",
+        yaxis_title="Time",
+        barmode= 'stack',
+        template="plotly_dark",
+        margin=dict(l=100, r=20, t=40, b=40),
+    )
+
+    herding_bar = go.Figure()
+    herding_bar.add_trace(
+        go.Bar(
+            y=list(herding_genes.values()),
+            x=list(herding_genes.keys()),
+            orientation="v",
+            marker=dict(color=[herding_colors[gene] for gene in herding_genes.keys()]),
+        )
+    )
+    herding_bar.update_layout(
+        title="Herding Genes",
+        xaxis_title="Value",
+        yaxis_title="Gene Name",
+        template="plotly_dark",
+        margin=dict(l=100, r=20, t=40, b=40),
+    )
+
+    return bar_chart, wag_pie, color_pie, sense_bar, reproduction_bar, herding_bar
 
 
 def get_gene_bar_chart(sim_selected, species_id, simulations_base_folder):
@@ -392,22 +504,80 @@ def get_gene_bar_chart(sim_selected, species_id, simulations_base_folder):
             return html.Div("No genes found for this species.")
 
         # Generate bar and pie charts
-        bar_chart, pie_chart = create_gene_bar_chart(gene_data)
+        bar_chart, wag_pie, color_pie, sense_bar, reproduction_bar, herding_bar = create_gene_bar_chart(gene_data)
 
         # Return a layout with both graphs side by side
         return html.Div(
-            style={"display": "flex", "gap": "20px"},  # Layout adjustment
+            style={"display": "flex", "width": "100%", "gap": "20px"},  # Outer container fills full width
             children=[
-                dcc.Graph(figure=bar_chart, config={"displayModeBar": False}, style={"flex": "2"}),  # Larger
-                dcc.Graph(figure=pie_chart, config={"displayModeBar": False}, style={"flex": "1"}),  # Smaller
-            ],
+                # Left column:
+                html.Div(
+                    style={
+                        "flex": "1", 
+                        "display": "flex", 
+                        "flexDirection": "column", 
+                        "gap": "20px"
+                    },
+                    children=[
+                        html.Div(
+                            style={"display": "flex", "gap": "20px"},
+                            children = [
+                                dcc.Graph(
+                                    figure=bar_chart,
+                                    config={"displayModeBar": True},
+                                        style={"flex": "2", "height": 400}
+                                ),
+                                dcc.Graph(
+                                    figure=herding_bar,
+                                    config={"displayModeBar": False},
+                                        style={"flex": "1", "height": 400}
+                                ),
+                            ]
+                        ),
+                        html.Div(
+                            style={"display": "flex", "gap": "20px"},
+                            children=[
+                                dcc.Graph(
+                                    figure=sense_bar,
+                                    config={"displayModeBar": False},
+                                    style={"flex": "2", "height": 400}
+                                ),
+                                dcc.Graph(
+                                    figure=reproduction_bar,
+                                    config={"displayModeBar": False},
+                                    style={"flex": "1", "height": 400}
+                                )
+                            ]
+                        )
+                    ]
+                ),
+                # Right column:
+                html.Div(
+                    style={
+                        "flex": "1", 
+                        "display": "flex", 
+                        "flexDirection": "column", 
+                        "gap": "20px"
+                    },
+                    children=[
+                        dcc.Graph(
+                            figure=wag_pie,
+                            config={"displayModeBar": False},
+                            style={"height": 400}
+                        ),
+                        dcc.Graph(
+                            figure=color_pie,
+                            config={"displayModeBar": False},
+                            style={"height": 400}
+                        )
+                    ]
+                )
+            ]
         )
 
     except Exception as e:
         print(f"Error generating gene bar and pie charts: {e}")
         return html.Div("Error loading gene data.")
-
-
 
 
 def register_bibites_tab_callbacks(app):
@@ -428,7 +598,8 @@ def register_bibites_tab_callbacks(app):
     - None: This function modifies the Dash app by adding interactive callbacks.
     """
     @app.callback(
-        [Output("output-node-dropdown", "options"), Output("output-node-dropdown", "value")],  # Ensure both options & value are updated
+        [Output("output-node-dropdown", "options"), 
+         Output("output-node-dropdown", "value")],  # Ensure both options & value are updated
         [Input("bibites-dropdown", "value"),
          Input("sim-dropdown", "value")]
     )
@@ -585,7 +756,8 @@ def register_bibites_tab_callbacks(app):
                 {
                     "NodeIn": clean_value(synapse["NodeIn"]),
                     "NodeOut": clean_value(synapse["NodeOut"]),
-                    "Weight": clean_value(synapse.get("Weight", 0))
+                    "Weight": clean_value(synapse.get("Weight", 0)),
+                    "En": clean_value(synapse["En"])
                 }
                 for synapse in synapses
             ]
