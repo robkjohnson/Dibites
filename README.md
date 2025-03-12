@@ -30,7 +30,7 @@ Before running the application, you need to update the `config.json` file in the
 
 ```json
 {
-    "Path_To_Autosave_Folder": "C:\\Users\\\<YOUR USER NAME HERE\>\\AppData\\LocalLow\\The Bibites\\The Bibites\\Savefiles\\Autosaves",
+    "Path_To_Autosave_Folder": "C:\\Users\\<YOUR USER NAME HERE>\\AppData\\LocalLow\\The Bibites\\The Bibites\\Savefiles\\Autosaves",
     "UpdateFrequency": 600
 }
 ```
