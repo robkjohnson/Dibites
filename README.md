@@ -26,7 +26,7 @@ pip install -r requirements.txt
 Before running the application, you need to update the `config.json` file in the project directory. This file should specify the location where Bibites saves its autosaves.
 
 1. Open the config.json file.
-2. Update the Path_To_Autosave_Folder value to be the path to your autosave folder. Below is the default folder location, you just need to replace **<YOUR USER NAME HERE>** with your user name.
+2. Update the Path_To_Autosave_Folder value to be the path to your autosave folder. Below is the default folder location, you just need to replace **\<YOUR USER NAME HERE\>** with your user name.
 
 ```json
 {
