@@ -158,7 +158,7 @@ def getNodeType(type):
         "10":"Mult",
         "11":"Integrator",
         "12":"Inhibitory",
-        "13":"13",
+        "13":"SoftLatch",
         "14":"14",
         "15":"15",
         "16":"16",
