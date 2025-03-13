@@ -2,6 +2,7 @@ import pandas as pd
 import json
 import os
 
+
 def seconds_to_hours(seconds):
     """
     Convert a duration in seconds to hours, rounded to two decimal places.
@@ -141,3 +142,29 @@ def load_species_data(sim_selected, simulations_base_folder):
         print(f"Error loading species data: {e}")
         return pd.DataFrame(), []
 
+
+def getNodeType(type):
+    node_types = {
+        "0": "Input",
+        "1": "Sigmoid",
+        "2": "Linear",
+        "3": "TanH",
+        "4": "Sine",
+        "5": "ReLu",
+        "6": "Gaussian",
+        "7": "Differential",
+        "8": "Latch",
+        "9": "Abs",
+        "10":"Mult",
+        "11":"Integrator",
+        "12":"Inhibitory",
+        "13":"13",
+        "14":"14",
+        "15":"15",
+        "16":"16",
+        "17":"17",
+        "18":"18",
+        "19":"19",
+        "20":"20",
+    }
+    return node_types[type]
