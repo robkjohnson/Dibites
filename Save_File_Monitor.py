@@ -25,6 +25,7 @@ def process_zip(zip_path):
                     cleaned_str = re.sub(r'[^\x20-\x7E]', '', input_str)
                     settings_data = json.loads(cleaned_str)
                 zones = settings_data.get("zones", [])
+                zone_groups = settings_data.get("zoneGroups", [])
                 if zones and isinstance(zones, list):
                     sim_name = zones[0].get("name", "default_sim")
                 else:
