@@ -142,14 +142,16 @@ def process_zip(zip_path):
                     meat_counts.append(meat_count)
                     plant_amounts.append(plant_amount)
                     meat_amounts.append(meat_amount)
+
                 new_zones = pd.DataFrame({
-                    "update_time": [update_time] * len(count_series),
+                    "update_time": [update_time] * len(zone_names),
                     "zone_name": zone_names,
                     "plant_pellet_count": plant_counts,
                     "plant_total_amount": plant_amounts,
                     "meat_pellet_count": meat_counts,
                     "meat_total_amount": meat_amounts,
                 })
+
                 # pellet_df.append(new_zones)
                 pellet_df = pd.concat([pellet_df, new_zones], ignore_index=True)
 
