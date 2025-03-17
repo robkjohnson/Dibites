@@ -118,12 +118,11 @@ def process_zip(zip_path):
                     pellet_data = json.loads(cleaned_str)
                     pellets = pellet_data.get("pellets", [])       
 
-                new_zones = []
-                meat_counts = []
-                plant_counts = []
-                meat_amounts = []
-                plant_amounts = []
                 zone_names = []
+                plant_counts = []
+                plant_amounts = []
+                meat_counts = []
+                meat_amounts = []
                 for zone in pellets:
                     meat_count = 0
                     meat_amount = 0
@@ -132,15 +131,15 @@ def process_zip(zip_path):
                     for pellet in zone["pellets"]:
                         if pellet["pellet"]["material"] == "Meat":
                             meat_count += 1
-                            meat_amount += pellet["pellet"]["amount"]
+                            meat_amount += float(pellet["pellet"]["amount"])
                         else:
                             plant_count += 1
-                            plant_amount += pellet["pellet"]["amount"]
+                            plant_amount += float(pellet["pellet"]["amount"])
 
                     zone_names.append(zone["zone"])
                     plant_counts.append(plant_count)
-                    meat_counts.append(meat_count)
                     plant_amounts.append(plant_amount)
+                    meat_counts.append(meat_count)
                     meat_amounts.append(meat_amount)
 
                 new_zones = pd.DataFrame({
@@ -156,7 +155,7 @@ def process_zip(zip_path):
                 pellet_df = pd.concat([pellet_df, new_zones], ignore_index=True)
 
             except Exception as e:
-                print(f"Error processing {zip_path}: {e}")
+                print(f"Error processing Pellet Data: {e}")
                 return None
             
             # --- Save the updated data for this simulation ---
@@ -166,7 +165,7 @@ def process_zip(zip_path):
             
             return sim_name  # Optionally return the sim_name for logging
     except Exception as e:
-        print(f"Error processing Pellet Data: {e}")
+        print(f"Error processing {zip_path}: : {e}")
         return None
 
 def main():
