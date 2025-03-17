@@ -39,10 +39,12 @@ def process_zip(zip_path):
             sim_folder = os.path.join(simulations_base_folder, sim_name)
             species_data_file = os.path.join(sim_folder, "species_data.parquet")
             species_counts_file = os.path.join(sim_folder, "species_counts.parquet")
+            pellet_data_file = os.path.join(sim_folder, "pellet_data.parquet")
             
             # --- Load existing data for this simulation ---
             species_df = load_dataframe(species_data_file)
             counts_df = load_dataframe(species_counts_file, columns=["update_time", "speciesID", "count"])
+            pellet_df = load_dataframe(pellet_data_file)
             
             # --- Process speciesData.json for species details ---
             try:
@@ -107,14 +109,62 @@ def process_zip(zip_path):
                 #print(f"Species counts for simulated time {update_time} processed: {new_counts.shape[0]} species.")
             else:
                 print("No .bb8 files found or no speciesIDs extracted in bibites folder.")
+
+            try:
+                with z.open("pellets.bb8scene") as f:
+                    file_bytes = f.read()
+                    input_str = file_bytes.decode('utf-8', errors='ignore')
+                    cleaned_str = re.sub(r'[^\x20-\x7E]', '', input_str)
+                    pellet_data = json.loads(cleaned_str)
+                    pellets = pellet_data.get("pellets", [])       
+
+                new_zones = []
+                meat_counts = []
+                plant_counts = []
+                meat_amounts = []
+                plant_amounts = []
+                zone_names = []
+                for zone in pellets:
+                    meat_count = 0
+                    meat_amount = 0
+                    plant_count = 0
+                    plant_amount = 0
+                    for pellet in zone["pellets"]:
+                        if pellet["pellet"]["material"] == "Meat":
+                            meat_count += 1
+                            meat_amount += pellet["pellet"]["amount"]
+                        else:
+                            plant_count += 1
+                            plant_amount += pellet["pellet"]["amount"]
+
+                    zone_names.append(zone["zone"])
+                    plant_counts.append(plant_count)
+                    meat_counts.append(meat_count)
+                    plant_amounts.append(plant_amount)
+                    meat_amounts.append(meat_amount)
+                new_zones = pd.DataFrame({
+                    "update_time": [update_time] * len(count_series),
+                    "zone_name": zone_names,
+                    "plant_pellet_count": plant_counts,
+                    "plant_total_amount": plant_amounts,
+                    "meat_pellet_count": meat_counts,
+                    "meat_total_amount": meat_amounts,
+                })
+                # pellet_df.append(new_zones)
+                pellet_df = pd.concat([pellet_df, new_zones], ignore_index=True)
+
+            except Exception as e:
+                print(f"Error processing {zip_path}: {e}")
+                return None
             
             # --- Save the updated data for this simulation ---
             save_dataframe(species_df, species_data_file)
             save_dataframe(counts_df, species_counts_file)
+            save_dataframe(pellet_df, pellet_data_file)
             
             return sim_name  # Optionally return the sim_name for logging
     except Exception as e:
-        print(f"Error processing {zip_path}: {e}")
+        print(f"Error processing Pellet Data: {e}")
         return None
 
 def main():
