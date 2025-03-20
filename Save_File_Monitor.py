@@ -121,34 +121,44 @@ def process_zip(zip_path):
                 zone_names = []
                 plant_counts = []
                 plant_amounts = []
+                plant_avg_scales = []
                 meat_counts = []
                 meat_amounts = []
+                meat_avg_scales = []
                 for zone in pellets:
                     meat_count = 0
                     meat_amount = 0
                     plant_count = 0
                     plant_amount = 0
+                    plant_scale = 0
+                    meat_scale = 0
                     for pellet in zone["pellets"]:
                         if pellet["pellet"]["material"] == "Meat":
                             meat_count += 1
                             meat_amount += float(pellet["pellet"]["amount"])
+                            meat_scale += float(pellet["transform"]["scale"])
                         else:
                             plant_count += 1
                             plant_amount += float(pellet["pellet"]["amount"])
+                            plant_scale += float(pellet["transform"]["scale"])
 
                     zone_names.append(zone["zone"])
                     plant_counts.append(plant_count)
                     plant_amounts.append(plant_amount)
+                    plant_avg_scales.append(plant_scale/plant_count if plant_count > 0 else 0)
                     meat_counts.append(meat_count)
                     meat_amounts.append(meat_amount)
+                    meat_avg_scales.append(meat_scale/meat_count if meat_count > 0 else 0)
 
                 new_zones = pd.DataFrame({
                     "update_time": [update_time] * len(zone_names),
                     "zone_name": zone_names,
                     "plant_pellet_count": plant_counts,
                     "plant_total_amount": plant_amounts,
+                    "plant_avg_scale": plant_avg_scales,
                     "meat_pellet_count": meat_counts,
                     "meat_total_amount": meat_amounts,
+                    "meat_avg_scale": meat_avg_scales,
                 })
 
                 # pellet_df.append(new_zones)

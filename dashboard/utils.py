@@ -87,6 +87,17 @@ def get_update_frequency():
     config = get_config()
     return config.get("UpdateFrequency", 600)
 
+def load_pellet_data(sim_selected, simulations_base_folder):
+    sim_folder = os.path.join(simulations_base_folder, sim_selected)
+    pellet_file = os.path.join(sim_folder, "pellet_data.parquet")
+
+    pellet_df = pd.read_parquet(pellet_file)
+
+    if pellet_df.empty:
+        return pd.DataFrame(), []
+    else:
+        return pellet_df
+
 def load_species_data(sim_selected, simulations_base_folder):
     """
     Load and process species data for the selected simulation.

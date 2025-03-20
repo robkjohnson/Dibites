@@ -5,6 +5,7 @@ from utils import get_simulations_base_folder, get_update_frequency
 from tabs.sim_tab import get_sim_tab_content, register_sim_tab_callbacks
 from tabs.bibites_tab import get_bibites_tab_content, register_bibites_tab_callbacks
 from tabs.lineages_tab import get_lineages_tab_content, register_lineages_tab_callbacks
+from tabs.zones_tab import get_zones_tab_content, register_zones_tab_callbacks
 
 simulations_base_folder = get_simulations_base_folder()
 
@@ -53,7 +54,8 @@ def register_callbacks(app):
 
         if selected_main_tab == "sim":
             return get_sim_tab_content(sim_selected, n_intervals, simulations_base_folder)  # Update Sim graphs
-        
+        if selected_main_tab == "zones":
+            return get_zones_tab_content(sim_selected, n_intervals, simulations_base_folder)
         elif selected_main_tab == "bibite-analysis":
             if selected_sub_tab == "bibites":
                 return get_bibites_tab_content(sim_selected, n_intervals, simulations_base_folder)  # Update Bibites graphs

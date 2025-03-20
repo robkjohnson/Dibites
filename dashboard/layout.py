@@ -59,6 +59,16 @@ def get_layout():
                                             'padding': '5px 15px', 'lineHeight': '25px'}
                         ),
                         dcc.Tab(
+                            label="Zones",
+                            value="zones",
+                            style={'backgroundColor': '#343a40', 'color': 'white', 'textAlign': 'center',
+                                   'display': 'flex', 'justifyContent': 'center', 'alignItems': 'center',
+                                   'padding': '5px 15px', 'lineHeight': '25px'},
+                            selected_style={'backgroundColor': '#212529', 'color': 'white', 'textAlign': 'center',
+                                            'display': 'flex', 'justifyContent': 'center', 'alignItems': 'center',
+                                            'padding': '5px 15px', 'lineHeight': '25px'}
+                        ),
+                        dcc.Tab(
                             label="Bibite Analysis",
                             value="bibite-analysis",
                             style={'backgroundColor': '#343a40', 'color': 'white', 'textAlign': 'center',
